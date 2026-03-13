@@ -1,0 +1,33 @@
+{
+  "id": "vi-pomodoro",
+  "name": "Pomodoro Ultimate",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "4.0.0",
+  "author": "izzqz",
+  "license": "MIT",
+  "repository": "https://github.com/izzqz/noctalia-plugins",
+  "description": "Customizable pomodoro timer plugin for status bar",
+  "tags": [
+    "Bar",
+    "Productivity"
+  ],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "workDuration": 25,
+      "shortBreakDuration": 5,
+      "longBreakDuration": 15,
+      "sessionsBeforeLongBreak": 4,
+      "autoStartBreaks": false,
+      "autoStartWork": false
+    }
+  }
+}
