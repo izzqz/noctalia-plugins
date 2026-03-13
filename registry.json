@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "plugins": [
+    {    {
+      "id": "pomodoro-ultimate",
+      "name": "Pomodoro timer with scripts",
+      "version": "1.0.0",
+      "official": false,
+      "author": "izzqz",
+      "description": "Customizable pomodoro timer",
+      "repository": "https://github.com/izzqz/noctalia-plugins",
+      "minNoctaliaVersion": "3.6.0",
+      "license": "MIT",
+      "tags": [
+        "Bar",
+        "Productivity"
+      ],
+      "lastUpdated": "2026-01-27T08:47:06-05:00"
+    }
+  ]
+}
