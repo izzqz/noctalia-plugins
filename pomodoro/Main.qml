@@ -105,7 +105,13 @@ Item {
   property bool autoStartBreaks: _computeAutoStartBreaks()
   property bool autoStartWork: _computeAutoStartWork()
   property bool compactMode: _computeCompactMode()
-  
+
+  property bool hooksEnabled: _computeHooksEnabled()
+  property string hookTimerStart: _computeHookTimerStart()
+  property string hookTimerPause: _computeHookTimerPause()
+  property string hookSessionFinish: _computeHookSessionFinish()
+  property string hookModeChange: _computeHookModeChange()
+
   function _computeWorkDuration() { return (pluginApi?.pluginSettings?.workDuration ?? 25) * 60; }
   function _computeShortBreakDuration() { return (pluginApi?.pluginSettings?.shortBreakDuration ?? 5) * 60; }
   function _computeLongBreakDuration() { return (pluginApi?.pluginSettings?.longBreakDuration ?? 15) * 60; }
@@ -113,6 +119,11 @@ Item {
   function _computeAutoStartBreaks() { return pluginApi?.pluginSettings?.autoStartBreaks ?? false; }
   function _computeAutoStartWork() { return pluginApi?.pluginSettings?.autoStartWork ?? false; }
   function _computeCompactMode() { return pluginApi?.pluginSettings?.compactMode ?? false; }
+  function _computeHooksEnabled() { return pluginApi?.pluginSettings?.hooksEnabled ?? false; }
+  function _computeHookTimerStart() { return pluginApi?.pluginSettings?.hookTimerStart ?? ""; }
+  function _computeHookTimerPause() { return pluginApi?.pluginSettings?.hookTimerPause ?? ""; }
+  function _computeHookSessionFinish() { return pluginApi?.pluginSettings?.hookSessionFinish ?? ""; }
+  function _computeHookModeChange() { return pluginApi?.pluginSettings?.hookModeChange ?? ""; }
   
   onSettingsVersionChanged: {
     workDuration = _computeWorkDuration()
@@ -122,7 +133,28 @@ Item {
     autoStartBreaks = _computeAutoStartBreaks()
     autoStartWork = _computeAutoStartWork()
     compactMode = _computeCompactMode()
+    hooksEnabled = _computeHooksEnabled()
+    hookTimerStart = _computeHookTimerStart()
+    hookTimerPause = _computeHookTimerPause()
+    hookSessionFinish = _computeHookSessionFinish()
+    hookModeChange = _computeHookModeChange()
     Logger.i("Pomodoro", "Settings updated: autoStartBreaks=" + autoStartBreaks + ", autoStartWork=" + autoStartWork + ", compactMode=" + compactMode)
+  }
+
+  function _modeName(mode) {
+    if (mode === modeWork) return "work";
+    if (mode === modeShortBreak) return "short-break";
+    return "long-break";
+  }
+
+  function _executeHook(script, arg) {
+    if (!hooksEnabled || !script || script === "") return;
+    try {
+      const cmd = script.replace(/\$1/g, arg || "");
+      Quickshell.execDetached(["sh", "-lc", cmd]);
+    } catch (e) {
+      Logger.e("Pomodoro", "Hook failed: " + e);
+    }
   }
 
   function getDurationForMode(mode) {
@@ -161,10 +193,12 @@ Item {
     
     root.pomodoroTotalSeconds = root.pomodoroRemainingSeconds;
     root.pomodoroRunning = true;
+    _executeHook(hookTimerStart, _modeName(pomodoroMode));
   }
 
   function pomodoroPause() {
     root.pomodoroRunning = false;
+    _executeHook(hookTimerPause, _modeName(pomodoroMode));
   }
 
   function pomodoroResetSession() {
@@ -216,6 +250,7 @@ Item {
     root.pomodoroRemainingSeconds = getDurationForMode(root.pomodoroMode);
     root.pomodoroTotalSeconds = 0;
     root.pomodoroOriginalTotal = 0;
+    _executeHook(hookModeChange, _modeName(pomodoroMode));
   }
 
   function pomodoroOnFinished() {
@@ -242,8 +277,9 @@ Item {
       "clock"
     );
 
+    _executeHook(hookSessionFinish, _modeName(pomodoroMode));
     pomodoroAdvanceToNextPhase();
-    
+
     if (shouldAutoStart) {
       Qt.callLater(() => {
         root.pomodoroStart();

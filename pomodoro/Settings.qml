@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.Commons
 import qs.Widgets
 
@@ -15,6 +16,12 @@ ColumnLayout {
   property bool editAutoStartBreaks: false
   property bool editAutoStartWork: false
   property bool editCompactMode: false
+
+  property bool editHooksEnabled: false
+  property string editHookTimerStart: ""
+  property string editHookTimerPause: ""
+  property string editHookSessionFinish: ""
+  property string editHookModeChange: ""
 
   spacing: Style.marginM
 
@@ -42,10 +49,16 @@ ColumnLayout {
     root.editAutoStartBreaks = settings?.autoStartBreaks ?? defaults?.autoStartBreaks ?? false
     root.editAutoStartWork = settings?.autoStartWork ?? defaults?.autoStartWork ?? false
     root.editCompactMode = settings?.compactMode ?? defaults?.compactMode ?? false
+    root.editHooksEnabled = settings?.hooksEnabled ?? defaults?.hooksEnabled ?? false
+    root.editHookTimerStart = settings?.hookTimerStart ?? defaults?.hookTimerStart ?? ""
+    root.editHookTimerPause = settings?.hookTimerPause ?? defaults?.hookTimerPause ?? ""
+    root.editHookSessionFinish = settings?.hookSessionFinish ?? defaults?.hookSessionFinish ?? ""
+    root.editHookModeChange = settings?.hookModeChange ?? defaults?.hookModeChange ?? ""
 
     autoStartBreaksToggle.checked = root.editAutoStartBreaks
     autoStartWorkToggle.checked = root.editAutoStartWork
     compactModeToggle.checked = root.editCompactMode
+    hooksEnabledToggle.checked = root.editHooksEnabled
 
 
   }
@@ -198,6 +211,158 @@ ColumnLayout {
     }
   }
 
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    Layout.bottomMargin: Style.marginM
+  }
+
+  Item {
+    Layout.fillWidth: true
+    Layout.preferredHeight: hooksEnabledToggle.implicitHeight
+
+    NToggle {
+      id: hooksEnabledToggle
+      anchors.fill: parent
+      label: pluginApi?.tr("settings.hooks-enabled") || "Enable Hooks"
+      description: pluginApi?.tr("settings.hooks-enabled-desc") || "Execute shell commands on timer events"
+      checked: root.editHooksEnabled
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: Qt.PointingHandCursor
+      onClicked: {
+        root.editHooksEnabled = !root.editHooksEnabled
+        hooksEnabledToggle.checked = root.editHooksEnabled
+      }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.hook-timer-start") || "Timer Start"
+      description: pluginApi?.tr("settings.hook-timer-start-desc") || "Runs when timer starts. $1 = mode (work/short-break/long-break)"
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginS
+
+      NTextInput {
+        id: hookTimerStartInput
+        Layout.fillWidth: true
+        text: root.editHookTimerStart
+        onTextChanged: root.editHookTimerStart = text
+      }
+
+      NButton {
+        text: "Test"
+        enabled: hookTimerStartInput.text !== ""
+        onClicked: {
+          const cmd = hookTimerStartInput.text.replace(/\$1/g, "test");
+          Quickshell.execDetached(["sh", "-lc", cmd]);
+        }
+      }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.hook-timer-pause") || "Timer Pause"
+      description: pluginApi?.tr("settings.hook-timer-pause-desc") || "Runs when timer is paused. $1 = current mode"
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginS
+
+      NTextInput {
+        id: hookTimerPauseInput
+        Layout.fillWidth: true
+        text: root.editHookTimerPause
+        onTextChanged: root.editHookTimerPause = text
+      }
+
+      NButton {
+        text: "Test"
+        enabled: hookTimerPauseInput.text !== ""
+        onClicked: {
+          const cmd = hookTimerPauseInput.text.replace(/\$1/g, "test");
+          Quickshell.execDetached(["sh", "-lc", cmd]);
+        }
+      }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.hook-session-finish") || "Session Finish"
+      description: pluginApi?.tr("settings.hook-session-finish-desc") || "Runs when a session completes. $1 = finished mode"
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginS
+
+      NTextInput {
+        id: hookSessionFinishInput
+        Layout.fillWidth: true
+        text: root.editHookSessionFinish
+        onTextChanged: root.editHookSessionFinish = text
+      }
+
+      NButton {
+        text: "Test"
+        enabled: hookSessionFinishInput.text !== ""
+        onClicked: {
+          const cmd = hookSessionFinishInput.text.replace(/\$1/g, "test");
+          Quickshell.execDetached(["sh", "-lc", cmd]);
+        }
+      }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.hook-mode-change") || "Mode Change"
+      description: pluginApi?.tr("settings.hook-mode-change-desc") || "Runs when switching modes. $1 = new mode"
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginS
+
+      NTextInput {
+        id: hookModeChangeInput
+        Layout.fillWidth: true
+        text: root.editHookModeChange
+        onTextChanged: root.editHookModeChange = text
+      }
+
+      NButton {
+        text: "Test"
+        enabled: hookModeChangeInput.text !== ""
+        onClicked: {
+          const cmd = hookModeChangeInput.text.replace(/\$1/g, "test");
+          Quickshell.execDetached(["sh", "-lc", cmd]);
+        }
+      }
+    }
+  }
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("Pomodoro", "Cannot save settings: pluginApi is null")
@@ -211,6 +376,11 @@ ColumnLayout {
     pluginApi.pluginSettings.autoStartBreaks = root.editAutoStartBreaks
     pluginApi.pluginSettings.autoStartWork = root.editAutoStartWork
     pluginApi.pluginSettings.compactMode = root.editCompactMode
+    pluginApi.pluginSettings.hooksEnabled = root.editHooksEnabled
+    pluginApi.pluginSettings.hookTimerStart = root.editHookTimerStart
+    pluginApi.pluginSettings.hookTimerPause = root.editHookTimerPause
+    pluginApi.pluginSettings.hookSessionFinish = root.editHookSessionFinish
+    pluginApi.pluginSettings.hookModeChange = root.editHookModeChange
 
     pluginApi.saveSettings()
 

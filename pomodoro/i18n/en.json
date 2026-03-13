@@ -27,7 +27,17 @@
     "short-break-duration": "Short Break Duration",
     "short-break-duration-desc": "Duration of short breaks in minutes",
     "work-duration": "Work Duration",
-    "work-duration-desc": "Duration of each work session in minutes"
+    "work-duration-desc": "Duration of each work session in minutes",
+    "hooks-enabled": "Enable Hooks",
+    "hooks-enabled-desc": "Execute shell commands on timer events",
+    "hook-timer-start": "Timer Start",
+    "hook-timer-start-desc": "Runs when timer starts. $1 = mode (work/short-break/long-break)",
+    "hook-timer-pause": "Timer Pause",
+    "hook-timer-pause-desc": "Runs when timer is paused. $1 = current mode",
+    "hook-session-finish": "Session Finish",
+    "hook-session-finish-desc": "Runs when a session completes. $1 = finished mode",
+    "hook-mode-change": "Mode Change",
+    "hook-mode-change-desc": "Runs when switching modes. $1 = new mode"
   },
   "toast": {
     "break-finished": "Break over! Ready to focus?",
